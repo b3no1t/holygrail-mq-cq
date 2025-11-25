@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Container Query Units - Démonstration</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #f0f2f5;
+      padding: 2rem;
+      line-height: 1.6;
+    }
+
+    h1 {
+      color: #2c3e50;
+      margin-bottom: 1.5rem;
+    }
+
+    .intro {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin-bottom: 2rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .intro h2 {
+      color: #3498db;
+      margin-bottom: 1rem;
+    }
+
+    .intro p {
+      margin-bottom: 0.75rem;
+      color: #555;
+    }
+
+    /* 
+      Définition des conteneurs avec différentes largeurs
+      Chaque conteneur utilise container-type: inline-size
+      pour permettre l'utilisation des unités cq*
+    */
+    .container-demo {
+      container-type: inline-size;
+      container-name: demo;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      margin-bottom: 2rem;
+      padding: 2rem;
+    }
+
+    /* 
+      Card utilisant les unités Container Query
+      
+      Remarques importantes :
+      - font-size: clamp(1rem, 5cqw, 3rem) crée une typographie fluide
+      - Le clamp() garantit des limites min/max raisonnables
+      - padding: 3cqw s'adapte proportionnellement au conteneur
+      - gap: 2cqw pour l'espacement des éléments flex
+    */
+    .fluid-card {
+      background: slateblue;
+      color: white;
+      border-radius: 8px;
+      /* 
+        Padding relatif au conteneur (3% de la largeur)
+        Plus le conteneur est large, plus le padding est important
+      */
+      padding: 3cqw;
+    }
+
+    .fluid-card-header {
+      display: flex;
+      align-items: center;
+      /* Gap proportionnel à la largeur du conteneur */
+      gap: 2cqw;
+      margin-bottom: 2cqw;
+    }
+
+    .fluid-icon {
+      /* 
+        Taille d'icône fluide : entre 2rem minimum et 6rem maximum
+        La valeur médiane (10cqw) est 10% de la largeur du conteneur
+        
+        Exemple de calcul :
+        - Conteneur de 300px : 10cqw = 30px (limité à 32px par le min)
+        - Conteneur de 600px : 10cqw = 60px (utilisé)
+        - Conteneur de 800px : 10cqw = 80px (limité à 96px par le max)
+      */
+      font-size: clamp(2rem, 10cqw, 6rem);
+      line-height: 1;
+    }
+
+    .fluid-title {
+      /* Titre fluide : minimum 1.2rem, maximum 2.5rem */
+      font-size: clamp(1.2rem, 5cqw, 2.5rem);
+      font-weight: bold;
+      line-height: 1.2;
+    }
+
+    .fluid-body {
+      /* Texte fluide : minimum 0.9rem, maximum 1.3rem */
+      font-size: clamp(0.9rem, 3cqw, 1.3rem);
+      line-height: 1.6;
+      /* Marge inférieure proportionnelle */
+      margin-bottom: 2cqw;
+    }
+
+    .fluid-stats {
+      display: grid;
+      /* 
+        Grid avec gap fluide basé sur la largeur du conteneur
+        Les colonnes se répartissent automatiquement
+      */
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 2cqw;
+    }
+
+    .stat {
+      background: rgba(255,255,255,0.15);
+      /* Padding et border-radius fluides */
+      padding: 2cqw;
+      border-radius: 1cqw;
+      text-align: center;
+    }
+
+    .stat-value {
+      /* Valeur statistique avec taille fluide */
+      font-size: clamp(1.5rem, 6cqw, 3rem);
+      /* clamp( minimum, ratio, maximum)*/
+      font-weight: bold;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+      /* Label avec taille fluide */
+      font-size: clamp(0.8rem, 2.5cqw, 1.1rem);
+      opacity: 0.9;
+    }
+
+    /* Conteneurs de démonstration avec différentes largeurs */
+    .demo-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .size-label {
+      font-weight: bold;
+      color: #2c3e50;
+      margin-bottom: 0.75rem;
+      background: #e8f4f8;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      display: inline-block;
+    }
+
+    .small-container {
+      max-width: 350px;
+    }
+
+    .medium-container {
+      max-width: 550px;
+    }
+
+    .large-container {
+      max-width: 800px;
+    }
+
+    /* Tableau de référence des unités */
+    .units-reference {
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      margin-top: 3rem;
+    }
+
+    .units-reference h2 {
+      color: #2c3e50;
+      margin-bottom: 1.5rem;
+    }
+
+    .units-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .units-table th,
+    .units-table td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .units-table th {
+      background: #f8f9fa;
+      font-weight: bold;
+      color: #2c3e50;
+    }
+
+    .units-table code {
+      background: #f0f2f5;
+      padding: 0.2rem 0.5rem;
+      border-radius: 3px;
+      font-family: 'Courier New', monospace;
+      color: #e74c3c;
+    }
+  </style>
+</head>
+<body>
+  <h1>Container Query Units : Typographie et Espacements Fluides</h1>
+
+  <div class="intro">
+    <h2>Principe des Unités Container Query</h2>
+    <p>
+      Les unités <code>cqw</code>, <code>cqh</code>, <code>cqi</code>, <code>cqb</code>, 
+      <code>cqmin</code>, et <code>cqmax</code> permettent de dimensionner les éléments 
+      proportionnellement à leur conteneur parent, et non au viewport.
+    </p>
+    <p>
+      Cela crée des composants véritablement fluides où la typographie, les espacements, 
+      et même les tailles d'éléments s'adaptent harmonieusement à l'espace disponible.
+    </p>
+    <p>
+      <strong>Observez les trois cards ci-dessous :</strong> elles utilisent exactement 
+      le même code, mais leur apparence varie proportionnellement à la taille de leur conteneur.
+    </p>
+  </div>
+
+  <div class="demo-grid">
+    <!-- Petit conteneur : 350px -->
+    <div>
+      <div class="size-label">Petit conteneur (350px max)</div>
+      <div class="container-demo small-container">
+        <div class="fluid-card">
+          <div class="fluid-card-header">
+            <div class="fluid-icon">📊</div>
+            <div class="fluid-title">Analytics Dashboard</div>
+          </div>
+          <div class="fluid-body">
+            Dans un petit espace, tous les éléments sont proportionnellement réduits : 
+            icône, titre, texte, et espacements s'ajustent automatiquement.
+          </div>
+          <div class="fluid-stats">
+            <div class="stat">
+              <span class="stat-value">1.2K</span>
+              <span class="stat-label">Vues</span>
+            </div>
+            <div class="stat">
+              <span class="stat-value">89</span>
+              <span class="stat-label">Likes</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Conteneur moyen : 550px -->
+    <div>
+      <div class="size-label">Conteneur moyen (550px max)</div>
+      <div class="container-demo medium-container">
+        <div class="fluid-card">
+          <div class="fluid-card-header">
+            <div class="fluid-icon">📊</div>
+            <div class="fluid-title">Analytics Dashboard</div>
+          </div>
+          <div class="fluid-body">
+            Avec plus d'espace, l'icône devient plus grande, le texte plus lisible, 
+            et les espacements plus généreux. Tout cela sans aucune Media Query.
+          </div>
+          <div class="fluid-stats">
+            <div class="stat">
+              <span class="stat-value">1.2K</span>
+              <span class="stat-label">Vues</span>
+            </div>
+            <div class="stat">
+              <span class="stat-value">89</span>
+              <span class="stat-label">Likes</span>
+            </div>
+            <div class="stat">
+              <span class="stat-value">42</span>
+              <span class="stat-label">Partages</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Grand conteneur : 800px -->
+    <div>
+      <div class="size-label">Grand conteneur (800px max)</div>
+      <div class="container-demo large-container">
+        <div class="fluid-card">
+          <div class="fluid-card-header">
+            <div class="fluid-icon">📊</div>
+            <div class="fluid-title">Analytics Dashboard</div>
+          </div>
+          <div class="fluid-body">
+            Dans un grand conteneur, l'expérience devient premium : icône imposante, 
+            typographie confortable, espacements aérés. La fonction clamp() garantit 
+            que rien ne devient excessivement grand.
+          </div>
+          <div class="fluid-stats">
+            <div class="stat">
+              <span class="stat-value">1.2K</span>
+              <span class="stat-label">Vues</span>
+            </div>
+            <div class="stat">
+              <span class="stat-value">89</span>
+              <span class="stat-label">Likes</span>
+            </div>
+            <div class="stat">
+              <span class="stat-value">42</span>
+              <span class="stat-label">Partages</span>
+            </div>
+            <div class="stat">
+              <span class="stat-value">15</span>
+              <span class="stat-label">Commentaires</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="units-reference">
+    <h2>Référence des Unités Container Query</h2>
+    <table class="units-table">
+      <thead>
+        <tr>
+          <th>Unité</th>
+          <th>Description</th>
+          <th>Cas d'usage typique</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>cqw</code></td>
+          <td>1% de la largeur du conteneur</td>
+          <td>Espacements horizontaux, largeurs relatives</td>
+        </tr>
+        <tr>
+          <td><code>cqh</code></td>
+          <td>1% de la hauteur du conteneur</td>
+          <td>Espacements verticaux (attention : nécessite container-type: size)</td>
+        </tr>
+        <tr>
+          <td><code>cqi</code></td>
+          <td>1% de la dimension inline du conteneur</td>
+          <td>Équivalent à cqw en écriture horizontale, indépendant du mode d'écriture</td>
+        </tr>
+        <tr>
+          <td><code>cqb</code></td>
+          <td>1% de la dimension block du conteneur</td>
+          <td>Équivalent à cqh en écriture horizontale, indépendant du mode d'écriture</td>
+        </tr>
+        <tr>
+          <td><code>cqmin</code></td>
+          <td>La plus petite valeur entre cqi et cqb</td>
+          <td>Créer des espacements proportionnels à la plus petite dimension</td>
+        </tr>
+        <tr>
+          <td><code>cqmax</code></td>
+          <td>La plus grande valeur entre cqi et cqb</td>
+          <td>Créer des espacements proportionnels à la plus grande dimension</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="margin-top: 2rem; padding: 1rem; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px;">
+      <h3 style="color: #856404; margin-bottom: 0.5rem;">Bonne Pratique : Utilisez clamp()</h3>
+      <p style="color: #856404; margin: 0;">
+        Les unités cq* doivent presque toujours être utilisées avec <code>clamp(min, valeur, max)</code> 
+        pour garantir des tailles raisonnables. Par exemple : <code>font-size: clamp(1rem, 4cqw, 2rem)</code> 
+        assure que la taille de police reste entre 1rem et 2rem, quelle que soit la taille du conteneur.
+      </p>
+    </div>
+  </div>
+</body>
+</html>

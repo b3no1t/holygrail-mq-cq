@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pattern Card Adaptative avec Container Queries</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #f5f7fa;
+      padding: 2rem;
+      line-height: 1.6;
+    }
+
+    h1 {
+      color: #2c3e50;
+      margin-bottom: 1rem;
+    }
+
+    .description {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin-bottom: 2rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    }
+
+    /* 
+      PATTERN 1 : Définir des conteneurs avec différentes contraintes
+      
+      Chaque wrapper devient un conteneur indépendant.
+      La card à l'intérieur s'adaptera automatiquement à l'espace disponible
+      sans aucune connaissance du contexte global.
+    */
+    .card-wrapper {
+      /* 
+        container-type: inline-size active le containment sur la largeur
+        Cela permet d'utiliser @container queries et les unités cq*
+      */
+      container-type: inline-size;
+      
+      /* 
+        container-name: card permet de cibler explicitement ce conteneur
+        Utile quand plusieurs niveaux de containers sont imbriqués
+      */
+      container-name: card;
+      
+      /* Styles visuels du wrapper */
+      background: white;
+      border-radius: 12px;
+      padding: 1rem;
+    }
+
+    /* 
+      PATTERN 2 : Styles de base de la card
+      
+      Ces styles s'appliquent TOUJOURS, indépendamment de la taille du conteneur.
+      Ils définissent l'apparence par défaut pour les très petits conteneurs.
+    */
+    .product-card {
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .card-image-container {
+      /* 
+        Position relative pour permettre le positionnement absolu du badge
+        Aspect ratio 16/9 pour maintenir des proportions cohérentes
+      */
+      position: relative;
+      aspect-ratio: 16 / 9;
+      background: slateblue;
+      overflow: hidden;
+    }
+
+    .card-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .card-badge {
+      /* 
+        Badge positionné en absolu dans le coin supérieur droit
+        Font-size utilise clamp() avec unités cq* pour s'adapter au conteneur
+      */
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: rgba(255, 255, 255, 0.95);
+      color: #e74c3c;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-weight: bold;
+      /* 
+        Taille de police fluide : minimum 0.75rem, valeur cible 3cqw, maximum 1rem
+        S'adapte proportionnellement à la largeur du conteneur
+      */
+      font-size: clamp(0.75rem, 3cqw, 1rem);
+    }
+
+    .card-content {
+      /* 
+        flex: 1 permet au contenu de prendre tout l'espace vertical disponible
+        Display flex pour positionner le footer en bas avec margin-top: auto
+      */
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .card-category {
+      /* Catégorie avec couleur distinctive et taille fluide */
+      color: #3498db;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-size: clamp(0.7rem, 2.5cqw, 0.9rem);
+      margin-bottom: 0.5rem;
+    }
+
+    .card-title {
+      /* 
+        Titre principal avec taille fluide
+        Line-height: 1.3 pour une meilleure lisibilité sur plusieurs lignes
+      */
+      font-size: clamp(1rem, 4cqw, 1.8rem);
+      font-weight: bold;
+      color: #2c3e50;
+      margin-bottom: 0.75rem;
+      line-height: 1.3;
+    }
+
+    .card-description {
+      /* 
+        Description avec limitation à 3 lignes via line-clamp
+        Affichage d'ellipsis si le texte dépasse
+      */
+      color: #7f8c8d;
+      font-size: clamp(0.85rem, 3cqw, 1.05rem);
+      line-height: 1.6;
+      margin-bottom: 1rem;
+      overflow: hidden;
+    }
+
+    .card-footer {
+      /* 
+        Footer poussé en bas avec margin-top: auto
+        Display flex pour répartir prix et bouton
+      */
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-top: auto;
+      padding-top: 1rem;
+      border-top: 1px solid #ecf0f1;
+    }
+
+    .card-price {
+      /* Prix avec taille fluide et poids bold */
+      font-size: clamp(1.2rem, 5cqw, 2rem);
+      font-weight: bold;
+      color: #27ae60;
+    }
+
+    .card-button {
+      /* 
+        Bouton avec padding fluide basé sur la largeur du conteneur
+        Transition pour effet hover smooth
+      */
+      background: #3498db;
+      color: white;
+      border: none;
+      padding: clamp(0.5rem, 2cqw, 1rem) clamp(1rem, 4cqw, 2rem);
+      border-radius: 6px;
+      font-size: clamp(0.85rem, 3cqw, 1.05rem);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      white-space: nowrap;
+    }
+
+    .card-button:hover {
+      background: #2980b9;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    /* 
+      PATTERN 3 : Container Query pour conteneurs moyens (400px+)
+      
+      À partir de 400px, la card obtient plus d'espace.
+      On peut commencer à afficher plus d'informations et augmenter les espacements.
+    */
+    @container card (min-width: 400px) {
+      .card-content {
+        /* Augmentation du padding pour plus de respiration */
+        padding: 2rem;
+      }
+
+      .card-description {
+        /* 
+          Augmentation du line-clamp à 4 lignes
+          Plus d'espace = plus de contenu visible
+        */
+        -webkit-line-clamp: 4;
+      }
+    }
+
+    /* 
+      PATTERN 4 : Container Query pour grands conteneurs (600px+)
+      
+      Au-delà de 600px, on passe en layout horizontal (flex-direction: row)
+      L'image prend une largeur fixe à gauche, le contenu s'étend à droite
+    */
+    @container card (min-width: 600px) {
+      .product-card {
+        /* 
+          Changement majeur : passage en layout horizontal
+          L'image et le contenu sont côte à côte
+        */
+        flex-direction: row;
+      }
+
+      .card-image-container {
+        /* 
+          L'image prend une largeur fixe de 300px
+          flex-shrink: 0 empêche sa réduction si le contenu est long
+        */
+        width: 300px;
+        flex-shrink: 0;
+        aspect-ratio: 4 / 3; /* Ratio différent pour le mode horizontal */
+      }
+
+      .card-content {
+        /* 
+          flex: 1 permet au contenu de prendre tout l'espace horizontal restant
+          Le contenu s'étend et remplit l'espace disponible
+        */
+        flex: 1;
+      }
+
+      .card-description {
+        /* 
+          En mode horizontal, on peut afficher plus de lignes
+          Le layout offre plus d'espace vertical
+        */
+        -webkit-line-clamp: 5;
+      }
+
+      .card-footer {
+        /* 
+          En mode horizontal, le footer peut être en column
+          Prix au-dessus du bouton pour une meilleure hiérarchie visuelle
+        */
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .card-button {
+        /* Le bouton prend toute la largeur disponible */
+        width: 100%;
+      }
+    }
+
+    /* 
+      PATTERN 5 : Container Query pour très grands conteneurs (800px+)
+      
+      Dans les très grands espaces, on peut se permettre des espacements luxueux
+      et afficher encore plus de contenu
+    */
+    @container card (min-width: 800px) {
+      .card-image-container {
+        /* Image encore plus large pour un impact visuel fort */
+        width: 400px;
+      }
+
+      .card-content {
+        /* Padding généreux pour un design aéré et premium */
+        padding: 3rem;
+      }
+
+      .card-description {
+        /* Affichage de jusqu'à 6 lignes de description */
+        -webkit-line-clamp: 6;
+      }
+    }
+
+    /* Grille de démonstration avec différentes largeurs de conteneurs */
+    .demo-section {
+      margin-bottom: 3rem;
+    }
+
+    .demo-label {
+      font-weight: bold;
+      color: #2c3e50;
+      margin-bottom: 1rem;
+      padding: 0.5rem 1rem;
+      background: #e8f4f8;
+      border-radius: 6px;
+      display: inline-block;
+    }
+
+    .demo-grid {
+      display: grid;
+      gap: 2rem;
+      margin-top: 1rem;
+    }
+
+    /* Contraintes de largeur pour illustrer les différents breakpoints */
+    .narrow {
+      max-width: 350px;
+    }
+
+    .medium {
+      max-width: 550px;
+    }
+
+    .wide {
+      max-width: 750px;
+    }
+
+    .extra-wide {
+      max-width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <h1>Pattern Card Adaptative avec Container Queries</h1>
+
+  <div class="description">
+    <h2>Composant Réutilisable et Contextuel</h2>
+    <p>
+      Cette card produit utilise les Container Queries pour s'adapter automatiquement 
+      à son contexte d'utilisation. Le même composant HTML fonctionne parfaitement dans 
+      une sidebar étroite, une grille de produits, ou une bannière pleine largeur.
+    </p>
+    <p>
+      <strong>Breakpoints Container Query utilisés :</strong>
+    </p>
+    <ul>
+      <li>Par défaut : Layout vertical compact pour conteneurs étroits</li>
+      <li>400px+ : Espacements augmentés, plus de lignes de description</li>
+      <li>600px+ : Layout horizontal avec image à gauche</li>
+      <li>800px+ : Version premium avec image large et espacements généreux</li>
+    </ul>
+  </div>
+
+  <div class="demo-section">
+    <div class="demo-label">Conteneur étroit (350px) - Layout vertical compact</div>
+    <div class="demo-grid">
+      <div class="card-wrapper narrow">
+        <div class="product-card">
+          <div class="card-image-container">
+            <div class="card-image"></div>
+            <div class="card-badge">-25%</div>
+          </div>
+          <div class="card-content">
+            <div class="card-category">Électronique</div>
+            <h3 class="card-title">Casque Audio Premium</h3>
+            <p class="card-description">
+              Profitez d'une qualité sonore exceptionnelle avec ce casque audio haut de gamme. 
+              Réduction de bruit active, autonomie de 30h, et confort optimal pour vos longues 
+              sessions d'écoute. Compatible Bluetooth 5.0 et câble jack 3.5mm.
+            </p>
+            <div class="card-footer">
+              <div class="card-price">149€</div>
+              <button class="card-button">Acheter</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <div class="demo-label">Conteneur moyen (550px) - Espacements augmentés</div>
+    <div class="demo-grid">
+      <div class="card-wrapper medium">
+        <div class="product-card">
+          <div class="card-image-container">
+            <div class="card-image"></div>
+            <div class="card-badge">-25%</div>
+          </div>
+          <div class="card-content">
+            <div class="card-category">Électronique</div>
+            <h3 class="card-title">Casque Audio Premium</h3>
+            <p class="card-description">
+              Profitez d'une qualité sonore exceptionnelle avec ce casque audio haut de gamme. 
+              Réduction de bruit active, autonomie de 30h, et confort optimal pour vos longues 
+              sessions d'écoute. Compatible Bluetooth 5.0 et câble jack 3.5mm.
+            </p>
+            <div class="card-footer">
+              <div class="card-price">149€</div>
+              <button class="card-button">Acheter</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <div class="demo-label">Conteneur large (750px) - Layout horizontal</div>
+    <div class="demo-grid">
+      <div class="card-wrapper wide">
+        <div class="product-card">
+          <div class="card-image-container">
+            <div class="card-image"></div>
+            <div class="card-badge">-25%</div>
+          </div>
+          <div class="card-content">
+            <div class="card-category">Électronique</div>
+            <h3 class="card-title">Casque Audio Premium</h3>
+            <p class="card-description">
+              Profitez d'une qualité sonore exceptionnelle avec ce casque audio haut de gamme. 
+              Réduction de bruit active, autonomie de 30h, et confort optimal pour vos longues 
+              sessions d'écoute. Compatible Bluetooth 5.0 et câble jack 3.5mm. Design ergonomique 
+              avec coussinets en mousse à mémoire de forme et arceau ajustable.
+            </p>
+            <div class="card-footer">
+              <div class="card-price">149€</div>
+              <button class="card-button">Acheter</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-section">
+    <div class="demo-label">Conteneur extra-large (pleine largeur) - Version premium</div>
+    <div class="demo-grid">
+      <div class="card-wrapper extra-wide">
+        <div class="product-card">
+          <div class="card-image-container">
+            <div class="card-image"></div>
+            <div class="card-badge">-25%</div>
+          </div>
+          <div class="card-content">
+            <div class="card-category">Électronique</div>
+            <h3 class="card-title">Casque Audio Premium</h3>
+            <p class="card-description">
+              Profitez d'une qualité sonore exceptionnelle avec ce casque audio haut de gamme. 
+              Réduction de bruit active, autonomie de 30h, et confort optimal pour vos longues 
+              sessions d'écoute. Compatible Bluetooth 5.0 et câble jack 3.5mm. Design ergonomique 
+              avec coussinets en mousse à mémoire de forme et arceau ajustable. Certifié Hi-Res 
+              Audio pour une restitution fidèle de tous vos morceaux préférés.
+            </p>
+            <div class="card-footer">
+              <div class="card-price">149€</div>
+              <button class="card-button">Acheter</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

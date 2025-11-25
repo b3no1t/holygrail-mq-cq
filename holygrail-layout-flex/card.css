@@ -57,7 +57,7 @@ img {
   padding: 0.8rem;
 
   &:hover {
-    background: gray;
+    background-color: gray;
     color: white;
   }
 

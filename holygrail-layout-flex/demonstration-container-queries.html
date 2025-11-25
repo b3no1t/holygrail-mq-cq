@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Container Queries - Syntaxe de Base</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #f5f5f5;
+      padding: 2rem;/* 2rem = 32px*/
+      line-height: 1.6;
+    }
+
+    h1 {
+      margin-bottom: 2rem;
+      color: #2c3e50;
+    }
+
+    /* 
+      ÉTAPE 1 : Définir un élément comme conteneur
+      container-type: inline-size surveille la largeur du conteneur
+      container-name: card-container donne un nom au conteneur (optionnel)
+      
+      Valeurs possibles pour container-type:
+      - inline-size : surveille uniquement la largeur (direction inline)
+      - size : surveille largeur ET hauteur (peut causer des problèmes de layout)
+      - normal : pas de containment
+    */
+    .container-wrapper {
+
+      container-type: inline-size;
+      container-name: card-container;
+
+      background: white;
+      padding: 1rem;
+      margin-bottom: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    /* 
+      Styles de base de la card
+      Ces styles s'appliquent toujours, quelle que soit la taille du conteneur
+    */
+
+    .card {
+      background: slategray;
+      color: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+
+    .card-header {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .card-icon {
+      font-size: 2rem;
+      flex-shrink: 0;
+    }
+
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-bottom: 0.25rem;
+    }
+
+    .card-subtitle {
+      font-size: 0.9rem;
+      opacity: 0.9;
+    }
+
+    .card-body {
+      line-height: 1.6;
+    }
+
+    .card-footer {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(255,255,255,0.2);
+      display: none; /* Caché par défaut sur petits conteneurs */
+    }
+
+    /* 
+      ÉTAPE 2 : Écrire une Container Query
+      
+      Syntaxe: @container nom-du-conteneur (condition) { styles }
+      
+      Si aucun nom n'est spécifié, la requête cible le conteneur parent le plus proche.
+      Ici, on cible explicitement "card-container" défini plus haut.
+      
+      La condition (min-width: 400px) vérifie si le CONTENEUR (pas le viewport)
+      a une largeur minimale de 400px.
+    */
+    @container card-container (min-width: 400px) {
+      /* 
+        Quand le conteneur fait au moins 400px:
+        - La card passe en layout horizontal
+        - L'icône devient plus grande
+        - Le footer devient visible
+      */
+      .card {
+        padding: 2rem;
+      }
+
+      .card-header {
+        align-items: center;
+      }
+
+      .card-icon {
+        font-size: 3rem;
+      }
+
+      .card-footer {
+        display: block;
+      }
+    }
+
+    /* 
+      Container Query pour grands conteneurs (600px+)
+      Les styles s'appliquent EN PLUS des styles précédents
+      (principe de cascade CSS)
+    */
+    @container card-container (min-width: 600px) {
+      .card {
+        padding: 2.5rem;
+      }
+
+      .card-header {
+        gap: 1.5rem;
+      }
+
+      .card-icon {
+        font-size: 4rem;
+      }
+
+      .card-title {
+        font-size: 1.5rem;
+      }
+
+      .card-body {
+        font-size: 1.1rem;
+      }
+    }
+
+    /* Styles pour la démo : différentes largeurs de conteneurs */
+    .demo-flex {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    .demo-label {
+      font-weight: bold;
+      color: #666;
+      margin-bottom: 0.5rem;
+    }
+
+    /* Conteneur étroit : 300px */
+    .narrow {
+      width: 100%;
+      max-width: 300px;
+    }
+
+    /* Conteneur moyen : 500px */
+    .medium {
+      width: 100%;
+      max-width: 500px;
+    }
+
+    /* Conteneur large : 700px */
+    .wide {
+      width: 100%;
+      max-width: 700px;
+    }
+
+    /* Informations techniques */
+    .info-box {
+      background: #fff3cd;
+      border-left: 4px solid #ffc107;
+      padding: 1rem;
+      margin: 2rem 0;
+      border-radius: 4px;
+    }
+
+    .info-box h3 {
+      color: #856404;
+      margin-bottom: 0.5rem;
+    }
+
+    .info-box p {
+      color: #856404;
+      margin-bottom: 0.5rem;
+    }
+
+    .info-box code {
+      background: rgba(0,0,0,0.1);
+      padding: 0.2rem 0.4rem;
+      border-radius: 3px;
+      font-size: 0.9em;
+    }
+  </style>
+
+</head>
+<body>
+  <h1>Container Queries : Syntaxe de Base</h1>
+
+  <div class="info-box">
+    <h3>Comment ça fonctionne ?</h3>
+    <p>Les trois cards ci-dessous sont IDENTIQUES (même HTML, même CSS), mais placées dans des conteneurs de largeurs différentes.</p>
+    <p>Grâce aux <code>@container</code> queries, chaque card s'adapte automatiquement à son contexte, sans Media Queries globales.</p>
+    <p><strong>Redimensionnez la fenêtre</strong> pour voir que les cards gardent leur comportement relatif à leur conteneur, pas au viewport.</p>
+  </div>
+
+  <div class="demo-flex">
+    <!-- Conteneur étroit : 300px -->
+    <div>
+      <div class="demo-label">Conteneur étroit (300px)</div>
+      <div class="container-wrapper narrow">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon">🎨</div>
+            <div>
+              <div class="card-title">Design System</div>
+              <div class="card-subtitle">Composants modulaires</div>
+            </div>
+          </div>
+          <div class="card-body">
+            Dans un conteneur étroit, la card adopte une mise en page compacte et verticale, optimisée pour les espaces restreints.
+          </div>
+          <div class="card-footer">
+            Ce footer n'apparaît qu'à partir de 400px de largeur de conteneur.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Conteneur moyen : 500px -->
+    <div>
+      <div class="demo-label">Conteneur moyen (500px)</div>
+      <div class="container-wrapper medium">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon">🎨</div>
+            <div>
+              <div class="card-title">Design System</div>
+              <div class="card-subtitle">Composants modulaires</div>
+            </div>
+          </div>
+          <div class="card-body">
+            À partir de 400px, le footer devient visible et les espacements augmentent pour une meilleure lisibilité.
+          </div>
+          <div class="card-footer">
+            Ce footer n'apparaît qu'à partir de 400px de largeur de conteneur.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Conteneur large : 700px -->
+    <div>
+      <div class="demo-label">Conteneur large (700px)</div>
+      <div class="container-wrapper wide">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon">🎨</div>
+            <div>
+              <div class="card-title">Design System</div>
+              <div class="card-subtitle">Composants modulaires</div>
+            </div>
+          </div>
+          <div class="card-body">
+            Dans un conteneur large (600px+), tous les éléments deviennent plus spacieux avec des tailles de police augmentées et des espacements généreux.
+          </div>
+          <div class="card-footer">
+            Ce footer n'apparaît qu'à partir de 400px de largeur de conteneur.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-box" style="margin-top: 3rem;">
+    <h3>Points clés à retenir</h3>
+    <p><strong>1.</strong> <code>container-type: inline-size</code> transforme un élément en conteneur surveillé</p>
+    <p><strong>2.</strong> <code>container-name</code> permet de cibler un conteneur spécifique (optionnel)</p>
+    <p><strong>3.</strong> <code>@container (min-width: Xpx)</code> applique des styles basés sur la largeur du conteneur</p>
+    <p><strong>4.</strong> Les Container Queries permettent une réutilisabilité maximale des composants</p>
+  </div>
+</body>
+</html>
