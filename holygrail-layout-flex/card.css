@@ -1,0 +1,84 @@
+/* 
+* page : index.html
+* author : lepage
+* usage: card styles
+*/
+img {
+  /* faire une img flexible*/
+  max-width: 100%;
+  height: auto;
+}
+
+.card {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  box-shadow: 0 4px 1rem 0 rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 1rem 0;
+  display: flex;
+  flex-flow: column wrap;
+  gap: 1rem;
+
+  position: relative;
+}
+
+.card__image {
+ 
+}
+.card h2 {
+  padding-bottom: .5rem;
+}
+
+.card__content,
+.card__actions {
+  padding: 1.75rem;
+}
+
+.card p { line-height: 3ch ;}
+
+.card__actions {
+  display: flex;
+  /* flex: 1 1 auto; */
+  list-style: none;
+  /* justify-content: space-around; */
+  padding: 0;
+}
+
+.card__action {
+  width: 100%;
+}
+
+.card__btn {
+  display: block;
+  background: lightgray;
+  text-decoration: none;
+  color: black;
+  font-weight: bold;
+  padding: 0.8rem;
+
+  &:hover {
+    background: gray;
+    color: white;
+  }
+
+}
+
+.aside-2{ 
+  .card {
+     background: greenyellow;
+  }
+}
+@container aside-2 (min-width: 300px) {
+  .card {
+    flex-direction: column;
+  }
+  .card__image {
+    order: 2;
+  }
+  .card__content {
+    order: 1;
+  }
+  .card__actions {
+    order: 3;
+  }
+}

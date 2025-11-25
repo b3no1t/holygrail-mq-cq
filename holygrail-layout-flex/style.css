@@ -1,0 +1,64 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('card.css');
+
+*{
+  box-sizing: border-box; /* inclure le padding et la bordure dans la largeur et la hauteur totale des éléments */
+  margin: 0;
+  padding: 0;
+}
+
+.wrapper {
+  display: flex;  
+  flex-flow: row wrap; /*Marre d'écrire flex-direction et flex-wrap, un raccourci le flex-flow*/
+  font-weight: bold;
+  text-align: center; 
+
+  font-family: "Roboto", sans-serif;
+  font-optical-sizincg: auto;
+  font-weight: 300;
+  font-style: normal;
+}
+
+.wrapper > * { /* selectionne tous les enfants de .wrapper */
+  padding: 10px;
+  flex: 1 100%; /* raccourci de flex-grow, flex-shrink et flex-basis. Cela garantit qu'il occupe toute la largeur disponible par défaut*/
+}
+
+.header {
+  background: tomato;
+}
+
+.footer {
+  background: rgb(74, 220, 74);
+}
+
+.main {
+  text-align: left;
+  background: deepskyblue;
+}
+
+.aside-1 {
+  background: gold;
+}
+
+.aside-2 {
+  background: hotpink;
+  container-name: aside-2;
+  container-type: block;
+}
+
+@media all and (min-width: 600px) {
+  .aside { flex: 1 0 0; } /* flex-grow:1 = peut grandir, flex-shrink:0 = peut se rétrécir et que sa taille initiale est fixée à 0%  flex-basis:0 */
+}
+
+@media all and (min-width: 800px) {
+  .main    { flex: 3 0px; }
+  .aside-1 { order: 1; } 
+  .main    { order: 2; }
+  .aside-2 { order: 3; }
+  .footer  { order: 4; }
+}
+
+body {
+  padding: 2em; 
+}
