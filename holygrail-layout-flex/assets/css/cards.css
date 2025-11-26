@@ -9,7 +9,7 @@ C'est LA nouveauté : on déclare quel élément servira de référence
   * (inline-size car on surveille l'axe horizontal)
   */
   container-type: inline-size;
-  
+
   /* 
   container-name donne un nom au conteneur
   Permet de cibler spécifiquement ce conteneur dans les queries
@@ -23,18 +23,18 @@ C'est LA nouveauté : on déclare quel élément servira de référence
 Ces styles s'appliquent TOUJOURS, quelle que soit la taille
 */
 .adaptive-card {
-  
+
   color: white;
 
   /* Padding confortable */
   padding: .5rem;
-  
+
   /* Bordure et coins arrondis */
   border-radius: 8px;
-  
+
   /* Couleur de fond */
   background: transparent;
-  
+
   /* 
   Par défaut, disposition verticale (colonne)
   Image au-dessus, texte en dessous
@@ -70,6 +70,7 @@ Ces styles s'appliquent TOUJOURS, quelle que soit la taille
 (min-width: 400px) = "si le conteneur fait au moins 400px"
 */
 @container card-wrapper (min-width: 400px) {
+
   /* 
   Quand le conteneur dépasse 400px, on passe en disposition horizontale
   L'image à gauche, le contenu à droite
@@ -79,9 +80,9 @@ Ces styles s'appliquent TOUJOURS, quelle que soit la taille
     align-items: flex-start;
     background: white;
     color: black;
-    
+
   }
-  
+
   /* 
   L'image occupe maintenant 40% de la largeur
   Et non plus 100% comme en version verticale
@@ -96,19 +97,19 @@ Ces styles s'appliquent TOUJOURS, quelle que soit la taille
     */
     flex-shrink: 0;
   }
-  
+
   /* Le contenu occupe l'espace restant */
   .adaptive-card__content {
     flex: 1;
     justify-items: space-around;
-  
+
   }
-  
+
   /* Texte plus grand avec plus d'espace */
   .adaptive-card__title {
     font-size: 1.2rem;
   }
-  
+
   .adaptive-card__description {
     font-size: 1rem;
     color: #333;
@@ -125,23 +126,23 @@ Quand le conteneur dépasse 600px
     padding: 24px;
 
   }
-  
+
   /* Image encore plus grande */
   .adaptive-card__image {
     width: 45%;
     height: 250px;
   }
-  
+
   /* Typographie optimisée pour grand espace */
   .adaptive-card__title {
     font-size: 2rem;
     margin-bottom: 8px;
   }
-  
+
   .adaptive-card__description {
     font-size: 1rem;
   }
-  
+
   /* 
   On peut ajouter des éléments qui n'apparaissent
   que quand il y a assez d'espace
@@ -172,5 +173,26 @@ cqw = Container Query Width (largeur du conteneur en %)
     
     */
     font-size: clamp(18px, 4cqw, 2rem);
+  }
+}
+
+/* fine tunning */
+.aside-1 .adaptive-card {
+  background: slategray;
+  & img {
+    display: none;
+  }
+}
+
+.footer .adaptive-card-container {
+  display: flex;
+}
+
+.footer .adaptive-card {
+  width: 33, 3333%;
+  background: transparent;
+  color: white;
+  & img {
+    display: none;
   }
 }
